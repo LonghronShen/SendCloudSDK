@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27421.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7EECA2A4-B9C5-4063-8CEE-7250028824CA}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EB4A1F58-B1F2-448D-9431-95282B1A2E6C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{97A9FD8F-5DB7-4A81-9B27-E1FC5D002E24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendCloudSDK", "src\SendCloudSDK\SendCloudSDK.csproj", "{5083A9C3-DB93-462F-B349-CBDDF92633E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendCloudSDK.Test", "test\SendCloudSDK.Test\SendCloudSDK.Test.csproj", "{AC06A9B9-81C8-41E3-BD63-0E22F738507C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5083A9C3-DB93-462F-B349-CBDDF92633E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5083A9C3-DB93-462F-B349-CBDDF92633E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5083A9C3-DB93-462F-B349-CBDDF92633E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5083A9C3-DB93-462F-B349-CBDDF92633E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC06A9B9-81C8-41E3-BD63-0E22F738507C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC06A9B9-81C8-41E3-BD63-0E22F738507C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC06A9B9-81C8-41E3-BD63-0E22F738507C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC06A9B9-81C8-41E3-BD63-0E22F738507C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5083A9C3-DB93-462F-B349-CBDDF92633E7} = {EB4A1F58-B1F2-448D-9431-95282B1A2E6C}
+		{AC06A9B9-81C8-41E3-BD63-0E22F738507C} = {97A9FD8F-5DB7-4A81-9B27-E1FC5D002E24}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA8A0E45-D1BE-4819-9320-65545EBDE560}
+	EndGlobalSection
+EndGlobal
