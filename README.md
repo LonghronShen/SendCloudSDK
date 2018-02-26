@@ -6,4 +6,5 @@ Basically, it is based on the SendCloud Java SDK, providing these APIs:
 * SendSmsAsync
 * SendSmsCodeAsync
 * SendVoiceAsync
+
 Naming has been refreshed to match .NET rules.
