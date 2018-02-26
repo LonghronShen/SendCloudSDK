@@ -18,22 +18,20 @@ namespace SendCloudSDK.Core
     public class SendCloud
     {
 
-        public string Server { get; set; }
-
-        public string MailAPI { get; set; }
-
-        public string TemplateAPI { get; set; }
-
-        public string SmsAPI { get; set; }
-
-        public string VoiceAPI { get; set; }
-
-        public string TimeStampAPI { get; set; }
-
         public Configuration Configuration { get; set; }
 
         public SendCloud(Configuration config)
         {
+            this.Configuration = config;
+        }
+
+        public SendCloud(string apiUser, string apiKey, string smsUser, string smsKey)
+        {
+            this.Configuration = Configuration.LoadDefaultConfiguration();
+            this.Configuration.ApiUser = apiUser;
+            this.Configuration.ApiKey = apiKey;
+            this.Configuration.SmsKey = smsKey;
+            this.Configuration.SmsUser = smsUser;
         }
 
         /// <summary>
@@ -44,7 +42,7 @@ namespace SendCloudSDK.Core
         {
             using (var client = new HttpClient())
             {
-                var response = await client.GetAsync(this.TimeStampAPI);
+                var response = await client.GetAsync(this.Configuration.TimeStampAPI);
                 return await this.ValidateAsync<TimeStampResult>(response);
             }
         }
@@ -148,7 +146,7 @@ namespace SendCloudSDK.Core
                 @params.Add("respEmailId", "true");
                 @params.Add("useNotification", "false");
 
-                var url = mail.Content.UseTemplate ? this.TemplateAPI : this.MailAPI;
+                var url = mail.Content.UseTemplate ? this.Configuration.SendTemplateApi : this.Configuration.SendEmailApi;
                 var response = await client.PostAsync(url, new FormUrlEncodedContent(@params));
                 return await this.ValidateAsync(response);
             }
@@ -254,7 +252,7 @@ namespace SendCloudSDK.Core
                     multiPartContent.Add(new StreamContent(item.Content), item.Name);
                 }
 
-                var url = mail.Content.UseTemplate ? this.TemplateAPI : this.MailAPI;
+                var url = mail.Content.UseTemplate ? this.Configuration.SendTemplateApi : this.Configuration.SendEmailApi;
                 using (var client = new HttpClient())
                 {
                     var response = await client.PostAsync(url, multiPartContent);
@@ -297,7 +295,7 @@ namespace SendCloudSDK.Core
 
             using (var client = new HttpClient())
             {
-                var response = await client.PostAsync(this.SmsAPI, new FormUrlEncodedContent(treeMap));
+                var response = await client.PostAsync(this.Configuration.SendSmsApi, new FormUrlEncodedContent(treeMap));
                 return await this.ValidateAsync(response);
             }
         }
@@ -331,7 +329,7 @@ namespace SendCloudSDK.Core
 
             using (var client = new HttpClient())
             {
-                var response = await client.PostAsync(this.VoiceAPI, new FormUrlEncodedContent(treeMap));
+                var response = await client.PostAsync(this.Configuration.SendVoiceApi, new FormUrlEncodedContent(treeMap));
                 return await this.ValidateAsync(response);
             }
         }

@@ -41,7 +41,7 @@ namespace SendCloudSDK.Config
         /// <summary>
         /// 普通邮件发送
         /// </summary>
-        public string SendApi { get; set; }
+        public string SendEmailApi { get; set; }
 
         /// <summary>
         /// 地址列表发送
@@ -57,6 +57,11 @@ namespace SendCloudSDK.Config
         /// 语音发送
         /// </summary>
         public string SendVoiceApi { get; set; }
+
+        /// <summary>
+        /// TimeStamp Api.
+        /// </summary>
+        public string TimeStampAPI { get; set; }
 
         /// <summary>
         /// 邮件user

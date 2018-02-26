@@ -1,6 +1,6 @@
 ﻿{
   "Server": "http://www.sendcloud.net",
-  "SendApi": "http://api.sendcloud.net/apiv2/mail/send",
+  "SendEmailApi": "http://api.sendcloud.net/apiv2/mail/send",
   "SendTemplateApi": "http://api.sendcloud.net/apiv2/mail/sendtemplate",
   "SendSmsApi": "http://www.sendcloud.net/smsapi/send",
   "SendVoiceApi": "http://www.sendcloud.net/smsapi/sendVoice",
