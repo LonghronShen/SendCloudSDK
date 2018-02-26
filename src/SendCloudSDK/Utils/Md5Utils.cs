@@ -13,8 +13,8 @@ namespace SendCloudSDK.Utils
         {
             try
             {
-                var orgin = secret + "&" + string.Join("&", @params.Select(x => $"{x.Key}={x.Value}"));
-                return orgin?.GetHashString();
+                var orgin = secret + "&" + string.Join("&", @params.OrderBy(x => x.Key).Select(x => $"{x.Key}={x.Value}"));
+                return orgin?.GetMD5HashString();
             }
             catch (Exception ex)
             {

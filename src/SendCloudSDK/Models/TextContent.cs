@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SendCloudSDK.Config;
 using SendCloudSDK.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace SendCloudSDK.Models
             {
                 throw new ContentException("邮件内容为空");
             }
-            if (this.Text.Length > Config.Config.MaxContentSize)
+            if (this.Text.Length > Configuration.MaxContentSize)
             {
                 throw new ContentException("邮件内容过长");
             }

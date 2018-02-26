@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SendCloudSDK.Config;
 using SendCloudSDK.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace SendCloudSDK.Models
             {
                 throw new ReceiverException("地址列表为空");
             }
-            if (count > Config.Config.MaxMailList)
+            if (count > Configuration.MaxMailList)
             {
                 throw new ReceiverException("地址列表超过上限");
             }

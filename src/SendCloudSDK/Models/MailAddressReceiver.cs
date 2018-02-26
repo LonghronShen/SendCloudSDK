@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SendCloudSDK.Config;
 using SendCloudSDK.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -54,7 +55,7 @@ namespace SendCloudSDK.Models
             {
                 receivers += this.Bcc?.Count;
             }
-            if (receivers > Config.Config.MaxReceivers)
+            if (receivers > Configuration.MaxReceivers)
             {
                 throw new ReceiverException("收件人超出上限");
             }

@@ -4,13 +4,11 @@ using SendCloudSDK.Config;
 using SendCloudSDK.Models;
 using SendCloudSDK.Utils;
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace SendCloudSDK.Core
 {
@@ -18,22 +16,27 @@ namespace SendCloudSDK.Core
     public class SendCloud
     {
 
+        #region Properties
         public Configuration Configuration { get; set; }
 
-        public SendCloud(Configuration config)
+        public Action<HttpResponseMessage, Exception> DefaultExceptionHandler { get; set; }
+        #endregion
+
+        #region Constructors
+        public SendCloud(Configuration config, Action<HttpResponseMessage, Exception> defaultExceptionHandler = null)
         {
             this.Configuration = config;
+            this.DefaultExceptionHandler = defaultExceptionHandler;
         }
 
-        public SendCloud(string apiUser, string apiKey, string smsUser, string smsKey)
+        public SendCloud(string apiUser, string apiKey, string smsUser, string smsKey, Action<HttpResponseMessage, Exception> defaultExceptionHandler = null)
+            : this(Configuration.LoadDefaultConfiguration(apiUser, apiKey, smsUser, smsKey))
         {
-            this.Configuration = Configuration.LoadDefaultConfiguration();
-            this.Configuration.ApiUser = apiUser;
-            this.Configuration.ApiKey = apiKey;
-            this.Configuration.SmsKey = smsKey;
-            this.Configuration.SmsUser = smsUser;
+            this.DefaultExceptionHandler = defaultExceptionHandler;
         }
+        #endregion
 
+        #region APIS
         /// <summary>
         /// Get current server timestamp.
         /// </summary>
@@ -52,7 +55,7 @@ namespace SendCloudSDK.Core
         /// </summary>
         /// <param name="mail"></param>
         /// <returns></returns>
-        public async Task<ResponseData<dynamic>> SendMailAsync(SendCloudMail mail, string apiUser = null, string apiKey = null)
+        public async Task<ResponseData<dynamic>> SendMailAsync(SendCloudMail mail)
         {
             if (mail == null) throw new ArgumentNullException(nameof(mail));
             if (string.IsNullOrWhiteSpace(this.Configuration.ApiUser)) throw new ArgumentNullException(nameof(this.Configuration.ApiUser));
@@ -72,6 +75,119 @@ namespace SendCloudSDK.Core
             }
         }
 
+        /// <summary>
+        /// 发送短信
+        /// </summary>
+        /// <param name="sms"></param>
+        /// <returns></returns>
+        public async Task<ResponseData<SendSmsResult>> SendSmsAsync(SendCloudSms sms)
+        {
+            if (sms == null) throw new ArgumentNullException(nameof(sms));
+            if (string.IsNullOrWhiteSpace(this.Configuration.SmsUser)) throw new ArgumentNullException(nameof(this.Configuration.SmsUser));
+            if (string.IsNullOrWhiteSpace(this.Configuration.SmsKey)) throw new ArgumentNullException(nameof(this.Configuration.SmsKey));
+            Contract.EndContractBlock();
+
+            sms.Validate();
+
+            var timestampResponse = await this.GetServerTimeStampAsync();
+            var timestamp = timestampResponse.Info.TimeStamp;
+
+            var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
+            var treeMap = new Dictionary<string, string>();
+            treeMap.Add("smsUser", credential.ApiUser);
+            treeMap.Add("msgType", sms.MsgType.ToString());
+            treeMap.Add("phone", sms.GetPhoneString());
+            treeMap.Add("templateId", sms.TemplateId.ToString());
+            treeMap.Add("timestamp", timestamp.ToString());
+            if (sms.Vars?.Count > 0)
+            {
+                treeMap.Add("vars", sms.GetVarsString());
+            }
+
+            var signature = Md5Utils.MD5Signature(treeMap, credential.ApiKey);
+            treeMap.Add("signature", signature);
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsync(this.Configuration.SendSmsApi, new FormUrlEncodedContent(treeMap));
+                return await this.ValidateAsync<SendSmsResult>(response);
+            }
+        }
+
+        /// <summary>
+        /// 发送短信验证码
+        /// </summary>
+        /// <param name="smsCode"></param>
+        /// <returns></returns>
+        public async Task<ResponseData<SendSmsResult>> SendSmsCodeAsync(SendCloudSmsCode smsCode)
+        {
+            if (smsCode == null) throw new ArgumentNullException(nameof(smsCode));
+            if (string.IsNullOrWhiteSpace(this.Configuration.SmsUser)) throw new ArgumentNullException(nameof(this.Configuration.SmsUser));
+            if (string.IsNullOrWhiteSpace(this.Configuration.SmsKey)) throw new ArgumentNullException(nameof(this.Configuration.SmsKey));
+            Contract.EndContractBlock();
+
+            smsCode.Validate();
+
+            var timestampResponse = await this.GetServerTimeStampAsync();
+            var timestamp = timestampResponse.Info.TimeStamp;
+
+            var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
+            var treeMap = new Dictionary<string, string>();
+            treeMap.Add("smsUser", credential.ApiUser);
+            treeMap.Add("code", smsCode.Code);
+            treeMap.Add("phone", smsCode.Phone);
+            treeMap.Add("timestamp", timestamp.ToString());
+            if (smsCode.LabelId != null)
+            {
+                treeMap.Add("labelId", smsCode.LabelId.Value.ToString());
+            }
+
+            var signature = Md5Utils.MD5Signature(treeMap, credential.ApiKey);
+            treeMap.Add("signature", signature);
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsync(this.Configuration.SendSmsApi, new FormUrlEncodedContent(treeMap));
+                return await this.ValidateAsync<SendSmsResult>(response);
+            }
+        }
+
+        /// <summary>
+        /// 发送语音
+        /// </summary>
+        /// <param name="voice"></param>
+        /// <returns></returns>
+        public async Task<ResponseData<dynamic>> SendVoiceAsync(SendCloudVoice voice)
+        {
+            if (voice == null) throw new ArgumentNullException(nameof(voice));
+            if (string.IsNullOrWhiteSpace(this.Configuration.SmsUser)) throw new ArgumentNullException(nameof(this.Configuration.SmsUser));
+            if (string.IsNullOrWhiteSpace(this.Configuration.SmsKey)) throw new ArgumentNullException(nameof(this.Configuration.SmsKey));
+            Contract.EndContractBlock();
+
+            voice.Validate();
+
+            var timestampResponse = await this.GetServerTimeStampAsync();
+            var timestamp = timestampResponse.Info.TimeStamp;
+
+            var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
+            var treeMap = new Dictionary<string, string>();
+            treeMap.Add("smsUser", credential.ApiUser);
+            treeMap.Add("phone", voice.Phone);
+            treeMap.Add("code", voice.Code);
+            treeMap.Add("timestamp", timestamp.ToString());
+
+            var signature = Md5Utils.MD5Signature(treeMap, credential.ApiKey);
+            treeMap.Add("signature", signature);
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsync(this.Configuration.SendVoiceApi, new FormUrlEncodedContent(treeMap));
+                return await this.ValidateAsync(response);
+            }
+        }
+        #endregion
+
+        #region Internal
         /// <summary>
         /// 普通方式发送
         /// </summary>
@@ -261,79 +377,6 @@ namespace SendCloudSDK.Core
             }
         }
 
-        /// <summary>
-        /// 发送短信
-        /// </summary>
-        /// <param name="sms"></param>
-        /// <returns></returns>
-        public async Task<ResponseData<dynamic>> SendSmsAsync(SendCloudSms sms)
-        {
-            if (sms == null) throw new ArgumentNullException(nameof(sms));
-            if (string.IsNullOrWhiteSpace(this.Configuration.SmsUser)) throw new ArgumentNullException(nameof(this.Configuration.SmsUser));
-            if (string.IsNullOrWhiteSpace(this.Configuration.SmsKey)) throw new ArgumentNullException(nameof(this.Configuration.SmsKey));
-            Contract.EndContractBlock();
-
-            sms.Validate();
-
-            var timestampResponse = await this.GetServerTimeStampAsync();
-            var timestamp = timestampResponse.Info.TimeStamp;
-
-            var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
-            var treeMap = new Dictionary<string, string>();
-            treeMap.Add("smsUser", credential.ApiUser);
-            treeMap.Add("msgType", sms.MsgType.ToString());
-            treeMap.Add("phone", sms.GetPhoneString());
-            treeMap.Add("templateId", sms.TemplateId.ToString());
-            treeMap.Add("timestamp", timestamp.ToString());
-            if (sms.Vars?.Count > 0)
-            {
-                treeMap.Add("vars", sms.GetVarsString());
-            }
-
-            var signature = Md5Utils.MD5Signature(treeMap, credential.ApiKey);
-            treeMap.Add("signature", signature);
-
-            using (var client = new HttpClient())
-            {
-                var response = await client.PostAsync(this.Configuration.SendSmsApi, new FormUrlEncodedContent(treeMap));
-                return await this.ValidateAsync(response);
-            }
-        }
-
-        /// <summary>
-        /// 发送语音
-        /// </summary>
-        /// <param name="voice"></param>
-        /// <returns></returns>
-        public async Task<ResponseData<dynamic>> SendVoiceAsync(SendCloudVoice voice)
-        {
-            if (voice == null) throw new ArgumentNullException(nameof(voice));
-            if (string.IsNullOrWhiteSpace(this.Configuration.SmsUser)) throw new ArgumentNullException(nameof(this.Configuration.SmsUser));
-            if (string.IsNullOrWhiteSpace(this.Configuration.SmsKey)) throw new ArgumentNullException(nameof(this.Configuration.SmsKey));
-            Contract.EndContractBlock();
-
-            voice.Validate();
-
-            var timestampResponse = await this.GetServerTimeStampAsync();
-            var timestamp = timestampResponse.Info.TimeStamp;
-
-            var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
-            var treeMap = new Dictionary<string, string>();
-            treeMap.Add("smsUser", credential.ApiUser);
-            treeMap.Add("phone", voice.Phone);
-            treeMap.Add("code", voice.Code);
-            treeMap.Add("timestamp", timestamp.ToString());
-
-            var signature = Md5Utils.MD5Signature(treeMap, credential.ApiKey);
-            treeMap.Add("signature", signature);
-
-            using (var client = new HttpClient())
-            {
-                var response = await client.PostAsync(this.Configuration.SendVoiceApi, new FormUrlEncodedContent(treeMap));
-                return await this.ValidateAsync(response);
-            }
-        }
-
         protected virtual async Task<ResponseData<dynamic>> ValidateAsync(HttpResponseMessage response)
         {
             return await this.ValidateAsync<dynamic>(response);
@@ -347,9 +390,9 @@ namespace SendCloudSDK.Core
         protected virtual async Task<ResponseData<TResult>> ValidateAsync<TResult>(HttpResponseMessage response)
         {
             var s = await response.Content.ReadAsStringAsync();
-            var json = SystemUtils.Try(() => JObject.Parse(s));
-            if (json != null)
+            try
             {
+                var json = JObject.Parse(s);
                 if (json.Property("statusCode") != null)
                 {
                     return json.ToObject<ResponseData<TResult>>();
@@ -363,16 +406,31 @@ namespace SendCloudSDK.Core
                     };
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return new ResponseData<TResult>()
-                {
-                    StatusCode = (int)response.StatusCode,
-                    Message = "发送失败",
-                    Result = false
-                };
+                this.OnError(response, ex);
             }
+            return new ResponseData<TResult>()
+            {
+                StatusCode = (int)response.StatusCode,
+                Message = "发送失败",
+                Result = false
+            };
         }
+
+        protected virtual void OnError(HttpResponseMessage response, Exception ex)
+        {
+            if (this.DefaultExceptionHandler == null)
+            {
+                Debug.WriteLine(JsonConvert.SerializeObject(new
+                {
+                    Exception = ex.Message + Environment.NewLine + ex.StackTrace,
+                    Response = response
+                }));
+            }
+            this.DefaultExceptionHandler.Invoke(response, ex);
+        }
+        #endregion
 
     }
 

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -105,11 +106,22 @@ namespace SendCloudSDK.Config
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+                //Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+                throw;
             }
             return null;
+        }
+
+        public static Configuration LoadDefaultConfiguration(string apiUser, string apiKey, string smsUser, string smsKey)
+        {
+            var configuration = Configuration.LoadDefaultConfiguration();
+            configuration.ApiUser = apiUser;
+            configuration.ApiKey = apiKey;
+            configuration.SmsKey = smsKey;
+            configuration.SmsUser = smsUser;
+            return configuration;
         }
 
         public static Configuration LoadConfigurationFromString(string fileContent)
@@ -118,11 +130,11 @@ namespace SendCloudSDK.Config
             {
                 return JsonConvert.DeserializeObject<Configuration>(fileContent);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+                //Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+                throw;
             }
-            return null;
         }
 
     }

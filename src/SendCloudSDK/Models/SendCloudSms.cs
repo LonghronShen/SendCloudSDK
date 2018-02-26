@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SendCloudSDK.Config;
 using SendCloudSDK.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace SendCloudSDK.Models
             {
                 throw new SmsException("收信人为空");
             }
-            if (phoneCount > Config.Config.MaxReceivers)
+            if (phoneCount > Configuration.MaxReceivers)
             {
                 throw new SmsException("收信人超过限制");
             }
