@@ -17,6 +17,7 @@ namespace SendCloudSDK.Test
 
         public SendCloudTests()
         {
+
             this._sendCloud = new SendCloud("", "", "", "", (response, ex) =>
             {
                 Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
