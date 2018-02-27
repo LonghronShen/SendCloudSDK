@@ -54,7 +54,7 @@ namespace SendCloudSDK.Test
         {
             var response = await this._sendCloud.SendSmsAsync(new SendCloudSms()
             {
-                Phone = new List<string>() { "15262916011" },
+                Phone = new List<string>() { "" },
                 TemplateId = 12570,
                 Vars = new Dictionary<string, string>()
                 {
