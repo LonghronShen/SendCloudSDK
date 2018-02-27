@@ -41,12 +41,25 @@ namespace SendCloudSDK.Core
         /// Get current server timestamp.
         /// </summary>
         /// <returns></returns>
-        public async Task<ResponseData<TimeStampResult>> GetServerTimeStampAsync()
+        public async Task<ResponseData<TimeStampResult>> GetServerTimeStampAsync(bool fromLocal = false)
         {
-            using (var client = new HttpClient())
+            if (fromLocal)
             {
-                var response = await client.GetAsync(this.Configuration.TimeStampAPI);
-                return await this.ValidateAsync<TimeStampResult>(response);
+                return await Task.FromResult(new ResponseData<TimeStampResult>()
+                {
+                    Info = new TimeStampResult()
+                    {
+                        TimeStamp = DateTime.Now.ToUnixTimeStamp()
+                    }
+                });
+            }
+            else
+            {
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetAsync(this.Configuration.TimeStampAPI);
+                    return await this.ValidateAsync<TimeStampResult>(response);
+                }
             }
         }
 
@@ -93,7 +106,7 @@ namespace SendCloudSDK.Core
             var timestamp = timestampResponse.Info.TimeStamp;
 
             var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
-            var treeMap = new Dictionary<string, string>();
+            var treeMap = new SortedDictionary<string, string>();
             treeMap.Add("smsUser", credential.ApiUser);
             treeMap.Add("msgType", sms.MsgType.ToString());
             treeMap.Add("phone", sms.GetPhoneString());
@@ -132,7 +145,7 @@ namespace SendCloudSDK.Core
             var timestamp = timestampResponse.Info.TimeStamp;
 
             var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
-            var treeMap = new Dictionary<string, string>();
+            var treeMap = new SortedDictionary<string, string>();
             treeMap.Add("smsUser", credential.ApiUser);
             treeMap.Add("code", smsCode.Code);
             treeMap.Add("phone", smsCode.Phone);
@@ -170,7 +183,7 @@ namespace SendCloudSDK.Core
             var timestamp = timestampResponse.Info.TimeStamp;
 
             var credential = new Credential(this.Configuration.SmsUser, this.Configuration.SmsKey);
-            var treeMap = new Dictionary<string, string>();
+            var treeMap = new SortedDictionary<string, string>();
             treeMap.Add("smsUser", credential.ApiUser);
             treeMap.Add("phone", voice.Phone);
             treeMap.Add("code", voice.Code);

@@ -9,11 +9,11 @@ namespace SendCloudSDK.Utils
     internal static class Md5Utils
     {
 
-        public static string MD5Signature(Dictionary<string, string> @params, string secret)
+        public static string MD5Signature(IDictionary<string, string> @params, string secret)
         {
             try
             {
-                var orgin = secret + "&" + string.Join("&", @params.OrderBy(x => x.Key).Select(x => $"{x.Key}={x.Value}"));
+                var orgin = secret + "&" + string.Join("&", @params.Select(x => $"{x.Key}={x.Value}")) + "&" + secret;
                 return orgin?.GetMD5HashString();
             }
             catch (Exception ex)

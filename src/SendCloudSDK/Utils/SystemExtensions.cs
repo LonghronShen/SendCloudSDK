@@ -23,6 +23,12 @@ namespace System
             return string.Join("", hash.Select(x => x.ToString("X")));
         }
 
+        public static long ToUnixTimeStamp(this DateTime time)
+        {
+            var startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            return (long)(time - startTime).TotalSeconds;
+        }
+
     }
 
 }

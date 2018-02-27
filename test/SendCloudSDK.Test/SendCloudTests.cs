@@ -1,8 +1,11 @@
-﻿using SendCloudSDK.Core;
+﻿using Newtonsoft.Json;
+using SendCloudSDK.Config;
+using SendCloudSDK.Core;
 using SendCloudSDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -17,8 +20,8 @@ namespace SendCloudSDK.Test
 
         public SendCloudTests()
         {
-
-            this._sendCloud = new SendCloud("", "", "", "", (response, ex) =>
+            var configuration = File.ReadAllText("SendCloud.Development.json");
+            this._sendCloud = new SendCloud(Configuration.LoadConfigurationFromString(configuration), (response, ex) =>
             {
                 Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
             });
@@ -47,9 +50,20 @@ namespace SendCloudSDK.Test
         }
 
         [Fact]
-        public void SendSmsTest()
+        public async void SendSmsTest()
         {
-
+            var response = await this._sendCloud.SendSmsAsync(new SendCloudSms()
+            {
+                Phone = new List<string>() { "15262916011" },
+                TemplateId = 12570,
+                Vars = new Dictionary<string, string>()
+                {
+                    { "cluster", "021-上海第一人民医院" },
+                    { "service", "DB" },
+                    { "time", DateTime.Now.ToString() },
+                }
+            });
+            Assert.True(response.StatusCode == 200, JsonConvert.SerializeObject(response));
         }
 
         [Fact]
