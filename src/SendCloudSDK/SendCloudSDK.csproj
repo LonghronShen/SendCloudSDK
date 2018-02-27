@@ -8,6 +8,14 @@
     <DisableAssetTargetFallback>true</DisableAssetTargetFallback>
     <DisableImplicitAssetTargetFallback>true</DisableImplicitAssetTargetFallback>
     <PackageTargetFallback>$(AssetTargetFallback);netstandard2.0;portable-net45+win8+wp8+wpa81;portable45-net45+win8+wpa81</PackageTargetFallback>
+    <Authors>LonghronShen</Authors>
+    <Company>Synyi</Company>
+    <Product>SendCloud Sms/Email SDK</Product>
+    <Description>SendCloud SDK for SMS and Email. Supporting .NET Standard 2.0 and .NET Framework 4.5.1.</Description>
+    <PackageProjectUrl>https://github.com/LonghronShen/SendCloudSDK</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/LonghronShen/SendCloudSDK</RepositoryUrl>
+    <PackageTags>SendCloud;SMS;Email</PackageTags>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
